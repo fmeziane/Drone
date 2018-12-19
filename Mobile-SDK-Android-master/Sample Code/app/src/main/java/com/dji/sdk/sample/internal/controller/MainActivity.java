@@ -1,5 +1,10 @@
 package com.dji.sdk.sample.internal.controller;
 
+
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+
 import android.Manifest;
 import android.animation.AnimatorInflater;
 import android.animation.LayoutTransition;
@@ -34,8 +39,13 @@ import com.dji.sdk.sample.internal.model.ViewWrapper;
 import com.dji.sdk.sample.internal.utils.ToastUtils;
 import com.dji.sdk.sample.internal.view.DemoListView;
 import com.dji.sdk.sample.internal.view.PresentableView;
+import com.github.nkzawa.socketio.client.IO;
 import com.squareup.otto.Subscribe;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -87,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
             notifyStatusChange();
         }
     };
-
+    private Socket socket;
     //region Life-cycle
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +111,14 @@ public class MainActivity extends AppCompatActivity {
         contentFrameLayout = (FrameLayout) findViewById(R.id.framelayout_content);
 
         initParams();
+
+
+
+
+
+
     }
+
 
 
     /**

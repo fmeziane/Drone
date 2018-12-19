@@ -1,6 +1,8 @@
 package com.dji.sdk.sample.internal.view;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -18,16 +20,24 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dji.sdk.sample.R;
 import com.dji.sdk.sample.demo.bluetooth.BluetoothView;
+import com.dji.sdk.sample.internal.controller.ChatBoxActivity;
 import com.dji.sdk.sample.internal.controller.DJISampleApplication;
 import com.dji.sdk.sample.internal.controller.MainActivity;
 import com.dji.sdk.sample.internal.model.ViewWrapper;
 import com.dji.sdk.sample.internal.utils.DialogUtils;
 import com.dji.sdk.sample.internal.utils.GeneralUtils;
 import com.dji.sdk.sample.internal.utils.ToastUtils;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
 import com.squareup.otto.Subscribe;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import dji.common.error.DJIError;
 import dji.common.realname.AppActivationState;
@@ -43,12 +53,16 @@ import dji.sdk.realname.AppActivationManager;
 import dji.sdk.sdkmanager.BluetoothProductConnector;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.useraccount.UserAccountManager;
+
+import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by dji on 15/12/18.
  */
 public class MainContent extends RelativeLayout {
+
+
 
     public static final String TAG = MainContent.class.getName();
     private static BluetoothProductConnector connector = null;
@@ -78,12 +92,50 @@ public class MainContent extends RelativeLayout {
         super(context, attrs);
     }
 
+    private Socket socket;
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         DJISampleApplication.getEventBus().register(this);
         initUI();
     }
+    /*
+    public void connectToServer() {
+
+        try {
+            socket = IO.socket("http://192.168.86.223:3000");
+            socket.connect();
+            socket.emit("join", "connecté");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+
+        }
+
+        socket.on("newmessage", new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        JSONObject data = (JSONObject) args[0];
+                        try {
+                            //extract data from fired event
+                            int i=0;
+                            String message = data.getString("message");
+                            //Toast.makeText(ChatBoxActivMainity.this,'_'+ message + i +'_',Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(),'_'+ message + i +'_',Toast.LENGTH_SHORT).show();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+            }
+        });
+    } */
+
 
     private void initUI() {
         Log.v(TAG, "initUI");
@@ -103,11 +155,27 @@ public class MainContent extends RelativeLayout {
                     return;
                 }
                 DJISampleApplication.getEventBus().post(componentList);
+
+                Intent i  = new Intent(v.getContext(),ChatBoxActivity.class);
+                //retreive nickname from textview and add it to intent extra
+                getContext().startActivity(i);
+                //startActivity(i);
+
             }
+
+
         });
         mBtnBluetooth.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Intent i  = new Intent(v.getContext(),ChatBoxActivity.class);
+                //retreive nickname from textview and add it to intent extra
+                getContext().startActivity(i);
+
+
+                //startActivity(i);
+
                 if (GeneralUtils.isFastDoubleClick()) {
                     return;
                 }
