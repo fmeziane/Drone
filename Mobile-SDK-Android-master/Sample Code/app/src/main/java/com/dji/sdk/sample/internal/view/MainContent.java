@@ -159,7 +159,6 @@ public class MainContent extends RelativeLayout {
                 Intent i  = new Intent(v.getContext(),ChatBoxActivity.class);
                 //retreive nickname from textview and add it to intent extra
                 getContext().startActivity(i);
-                //startActivity(i);
 
             }
 

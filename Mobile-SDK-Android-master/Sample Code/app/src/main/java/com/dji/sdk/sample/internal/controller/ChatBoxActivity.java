@@ -39,21 +39,31 @@ public class ChatBoxActivity extends AppCompatActivity {
 
         }
 
+
+
         socket.on("newmessage", new Emitter.Listener() {
+
             @Override
             public void call(final Object... args) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+
                         JSONObject data = (JSONObject) args[0];
                         try {
                             //extract data from fired event
                             int i = 0;
+
+
                             String message = data.getString("message");
+                            String[] splited = message.split(" ");
+                            message = splited[0];
 
                             //Toast.makeText(ChatBoxActivity.this, '_' + message + i + '_', Toast.LENGTH_SHORT).show();
-                            if (message.equals("toto") )
+                            if (message.equals("decollage") )
                             {
+                                Toast.makeText(ChatBoxActivity.this, "Decollage", Toast.LENGTH_SHORT).show();
+                                /*
                                 Toast.makeText(ChatBoxActivity.this, "Decollage", Toast.LENGTH_SHORT).show();
                                 FlightController flightController = ModuleVerificationUtil.getFlightController();
                                 if (flightController == null) {
@@ -68,18 +78,35 @@ public class ChatBoxActivity extends AppCompatActivity {
                                             }
 
                                         });
-
+*/
 
                             }
+                            else {
+
+                                Toast.makeText(ChatBoxActivity.this, '_'+message+'_', Toast.LENGTH_SHORT).show();
+
+                            }
+/*
+                            if (message.equals("atterissage")) {
+
+                                Toast.makeText(ChatBoxActivity.this, "atterissage", Toast.LENGTH_SHORT).show();
+
+                            }
+*/
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
 
-                    }
+                     }
                 });
             }
         });
+
+
     }
+
+
 
     @Override
     protected void onDestroy() {
