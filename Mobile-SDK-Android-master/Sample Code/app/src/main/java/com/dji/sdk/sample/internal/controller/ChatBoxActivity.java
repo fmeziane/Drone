@@ -31,7 +31,7 @@ public class ChatBoxActivity extends AppCompatActivity {
         //setContentView(R.layout.activity_chat_box);
 
         try {
-            socket = IO.socket("http://192.168.86.223:3000");
+            socket = IO.socket("http://192.168.86.246:3000");
             socket.connect();
             socket.emit("join", "connecté");
         } catch (URISyntaxException e) {
@@ -59,18 +59,18 @@ public class ChatBoxActivity extends AppCompatActivity {
                             String[] splited = message.split(" ");
                             message = splited[0];
 
+                            FlightController flightController = ModuleVerificationUtil.getFlightController();
+                            /*if (flightController == null) {
+                                return;
+                            }*/
+
                             //Toast.makeText(ChatBoxActivity.this, '_' + message + i + '_', Toast.LENGTH_SHORT).show();
-                            if (message.equals("decollage") )
+                            if (message.equals("takeOff") )
                             {
-                                Toast.makeText(ChatBoxActivity.this, "Decollage", Toast.LENGTH_SHORT).show();
-                                /*
-                                Toast.makeText(ChatBoxActivity.this, "Decollage", Toast.LENGTH_SHORT).show();
-                                FlightController flightController = ModuleVerificationUtil.getFlightController();
+                                Toast.makeText(ChatBoxActivity.this, "takeOff", Toast.LENGTH_SHORT).show();
                                 if (flightController == null) {
-                                    Toast.makeText(ChatBoxActivity.this, "je ne suis pas ta chienne (cf JB)", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
-                                Toast.makeText(ChatBoxActivity.this, "Decollage 2 ", Toast.LENGTH_SHORT).show();
                                         flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
                                             @Override
                                             public void onResult(DJIError djiError) {
@@ -78,7 +78,22 @@ public class ChatBoxActivity extends AppCompatActivity {
                                             }
 
                                         });
-*/
+
+
+                            }
+
+                            else if (message.equals("landing")) {
+
+                                Toast.makeText(ChatBoxActivity.this, "landing", Toast.LENGTH_SHORT).show();
+                                if (flightController == null) {
+                                    return;
+                                }
+                                flightController.startLanding(new CommonCallbacks.CompletionCallback() {
+                                    @Override
+                                    public void onResult(DJIError djiError) {
+                                        DialogUtils.showDialogBasedOnError(ChatBoxActivity.this, djiError);
+                                    }
+                                });
 
                             }
                             else {
