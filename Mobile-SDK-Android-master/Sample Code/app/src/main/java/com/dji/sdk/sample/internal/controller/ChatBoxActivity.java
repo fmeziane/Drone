@@ -239,6 +239,20 @@ public class ChatBoxActivity extends AppCompatActivity {
                                 Thread.sleep(200);
                                 rightStick(0,0);
                             }
+                            else if (message.equals("forward1")){
+
+                                Toast.makeText(ChatBoxActivity.this, "forward", Toast.LENGTH_SHORT).show();
+                                rightStick(0,10);
+                                Thread.sleep(200);
+                                rightStick(0,0);
+                            }
+                            else if (message.equals("forward2")){
+
+                                Toast.makeText(ChatBoxActivity.this, "forward", Toast.LENGTH_SHORT).show();
+                                rightStick(0,5);
+                                Thread.sleep(500);
+                                rightStick(0,0);
+                            }
                             else if (message.equals("backward")){
 
                                 Toast.makeText(ChatBoxActivity.this, "backward", Toast.LENGTH_SHORT).show();
@@ -246,7 +260,20 @@ public class ChatBoxActivity extends AppCompatActivity {
                                 Thread.sleep(200);
                                 rightStick(0,0);
                             }
+                            else if (message.equals("backward1")){
 
+                                Toast.makeText(ChatBoxActivity.this, "backward", Toast.LENGTH_SHORT).show();
+                                rightStick(0,-10);
+                                Thread.sleep(200);
+                                rightStick(0,0);
+                            }
+                            else if (message.equals("backward2")){
+
+                                Toast.makeText(ChatBoxActivity.this, "backward", Toast.LENGTH_SHORT).show();
+                                rightStick(0,-10);
+                                Thread.sleep(500);
+                                rightStick(0,0);
+                            }
                             else if (message.equals("right")){
 
                                 Toast.makeText(ChatBoxActivity.this, "right", Toast.LENGTH_SHORT).show();
@@ -261,7 +288,6 @@ public class ChatBoxActivity extends AppCompatActivity {
                                 Thread.sleep(100);
                                 rightStick(0,0);
                             }
-
                             else if (message.equals("stopAll")){
 
                                 Toast.makeText(ChatBoxActivity.this, "stopAll", Toast.LENGTH_SHORT).show();
@@ -269,11 +295,8 @@ public class ChatBoxActivity extends AppCompatActivity {
                                 rightStick(0,0);
                             }
 
-                            // à tester
                             else {
-
                                 Toast.makeText(ChatBoxActivity.this, '_'+message+'_', Toast.LENGTH_SHORT).show();
-
                             }
 /*
                             if (message.equals("atterissage")) {
@@ -282,7 +305,6 @@ public class ChatBoxActivity extends AppCompatActivity {
 
                             }
 */
-
                         } catch (JSONException e) {
                             e.printStackTrace();
                         } catch (InterruptedException e) {
