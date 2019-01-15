@@ -104,7 +104,7 @@ public class ChatBoxActivity extends AppCompatActivity {
         try {
             socket = IO.socket("http://kamino-google-home.francecentral.cloudapp.azure.com:8002");
             socket.connect();
-            socket.emit("join", "connecté");
+            socket.emit("connect", "connecté");
         } catch (URISyntaxException e) {
             e.printStackTrace();
 
@@ -112,7 +112,7 @@ public class ChatBoxActivity extends AppCompatActivity {
 
 
 
-        socket.on("newmessage", new Emitter.Listener() {
+        socket.on("Here is some data", new Emitter.Listener() {
 
             @Override
             public void call(final Object... args) {
@@ -120,15 +120,15 @@ public class ChatBoxActivity extends AppCompatActivity {
                     @Override
                     public void run() {
 
-                        JSONObject data = (JSONObject) args[0];
+                        String message = (String)args[0];
                         try {
                             //extract data from fired event
                             int i = 0;
 
 
-                            String message = data.getString("message");
-                            String[] splited = message.split(" ");
-                            message = splited[0];
+                            //String message = data.getString("message");
+                            //String[] splited = message.split(" ");
+                            //message = splited[0];
 
                             FlightController flightController = ModuleVerificationUtil.getFlightController();
                             /*if (flightController == null) {
@@ -199,16 +199,16 @@ public class ChatBoxActivity extends AppCompatActivity {
 
                             //TEST CASQUE
 
-                            else if (message.equals("Push")){
+                            else if (message.equals("RotateLeft")){
                                 // YAW LEFT
-                                Toast.makeText(ChatBoxActivity.this, "yawLeft", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ChatBoxActivity.this, "RotateLeft", Toast.LENGTH_SHORT).show();
                                 leftStick(-5,0);
                                 Thread.sleep(1000);
                                 leftStick(0,0);
                             }
-                            else if (message.equals("Right")){
+                            else if (message.equals("RotateRight")){
                                 // YAW RIGHT
-                                Toast.makeText(ChatBoxActivity.this, "yawRight", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ChatBoxActivity.this, "RotateRight", Toast.LENGTH_SHORT).show();
                                 leftStick(5,0);
                                 Thread.sleep(1000);
                                 leftStick(0,0);
@@ -326,9 +326,10 @@ public class ChatBoxActivity extends AppCompatActivity {
 
                             }
 */
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        } catch (InterruptedException e) {
+                        } //catch (JSONException e) {
+                            //e.printStackTrace();
+                       // }
+                        catch (InterruptedException e) {
                             e.printStackTrace();
                         }
 
