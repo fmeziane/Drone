@@ -102,7 +102,7 @@ public class ChatBoxActivity extends AppCompatActivity {
         //setContentView(R.layout.activity_chat_box);
 
         try {
-            socket = IO.socket("http://testserverbmi.westeurope.cloudapp.azure.com:3000");
+            socket = IO.socket("http://kamino-google-home.francecentral.cloudapp.azure.com:8002");
             socket.connect();
             socket.emit("join", "connecté");
         } catch (URISyntaxException e) {
@@ -196,6 +196,25 @@ public class ChatBoxActivity extends AppCompatActivity {
                                 Thread.sleep(1000);
                                 leftStick(0,0);
                             }
+
+                            //TEST CASQUE
+
+                            else if (message.equals("Push")){
+                                // YAW LEFT
+                                Toast.makeText(ChatBoxActivity.this, "yawLeft", Toast.LENGTH_SHORT).show();
+                                leftStick(-5,0);
+                                Thread.sleep(1000);
+                                leftStick(0,0);
+                            }
+                            else if (message.equals("Right")){
+                                // YAW RIGHT
+                                Toast.makeText(ChatBoxActivity.this, "yawRight", Toast.LENGTH_SHORT).show();
+                                leftStick(5,0);
+                                Thread.sleep(1000);
+                                leftStick(0,0);
+                            }
+
+                            //
 
                             else if (message.equals("yawLeft1")){
 
@@ -292,11 +311,13 @@ public class ChatBoxActivity extends AppCompatActivity {
 
                                 Toast.makeText(ChatBoxActivity.this, "stopAll", Toast.LENGTH_SHORT).show();
                                 rightStick(0,0);
-                                rightStick(0,0);
+                                leftStick(0,0);
                             }
 
                             else {
                                 Toast.makeText(ChatBoxActivity.this, '_'+message+'_', Toast.LENGTH_SHORT).show();
+                                rightStick(0,0);
+                                leftStick(0,0);
                             }
 /*
                             if (message.equals("atterissage")) {
