@@ -4,19 +4,20 @@ package com.dji.sdk.sample.internal.controller;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.dji.sdk.sample.R;
-import com.dji.sdk.sample.internal.OnScreenJoystickListener;
 import com.dji.sdk.sample.internal.utils.DialogUtils;
 import com.dji.sdk.sample.internal.utils.ModuleVerificationUtil;
 import com.dji.sdk.sample.internal.utils.OnScreenJoystick;
-import com.dji.sdk.sample.internal.utils.ToastUtils;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
-import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,23 +25,11 @@ import org.json.JSONObject;
 import java.net.URISyntaxException;
 
 import dji.common.error.DJIError;
-import dji.common.flightcontroller.simulator.InitializationData;
-import dji.common.flightcontroller.simulator.SimulatorState;
-import dji.common.gimbal.Rotation;
-import dji.common.gimbal.RotationMode;
-import dji.common.model.LocationCoordinate2D;
 import dji.common.util.CommonCallbacks;
 import dji.keysdk.FlightControllerKey;
-import dji.keysdk.KeyManager;
 import dji.sdk.flightcontroller.FlightController;
-import dji.sdk.flightcontroller.Simulator;
 import dji.sdk.mobilerc.MobileRemoteController;
 import dji.sdk.products.Aircraft;
-
-import static android.view.View.INVISIBLE;
-import static android.view.View.VISIBLE;
-import static dji.common.gimbal.Rotation.NO_ROTATION;
-import static java.lang.Thread.sleep;
 
 
 public class ChatBoxActivity extends AppCompatActivity {
@@ -51,7 +40,7 @@ public class ChatBoxActivity extends AppCompatActivity {
     private ToggleButton btnSimulator;
     private FlightControllerKey isSimulatorActived;
     private TextView textView;
-
+    TextView mEdit;
     public void leftStick(float pX, float pY) {
         try {
             mobileRemoteController =
@@ -99,20 +88,21 @@ public class ChatBoxActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_chat_box);
-
+        setContentView(R.layout.activity_chat_box);
+        mEdit   = (TextView) findViewById(R.id.textView);
+        mEdit.setMovementMethod(new ScrollingMovementMethod());
         try {
-            socket = IO.socket("http://kamino-google-home.francecentral.cloudapp.azure.com:8002");
+            //socket = IO.socket("http://kamino-google-home.francecentral.cloudapp.azure.com:8002");
+            socket = IO.socket("http://testserverbmi.westeurope.cloudapp.azure.com:3000");
             socket.connect();
-            socket.emit("connect", "connecté");
+            socket.emit("join", "connecté");
         } catch (URISyntaxException e) {
             e.printStackTrace();
 
         }
 
 
-
-        socket.on("Here is some data", new Emitter.Listener() {
+        socket.on("newmessage", new Emitter.Listener() {
 
             @Override
             public void call(final Object... args) {
@@ -120,40 +110,39 @@ public class ChatBoxActivity extends AppCompatActivity {
                     @Override
                     public void run() {
 
-                        String message = (String)args[0];
+                        //String message = (String)args[0];
+                        JSONObject data = (JSONObject) args[0];
                         try {
                             //extract data from fired event
                             int i = 0;
 
 
-                            //String message = data.getString("message");
-                            //String[] splited = message.split(" ");
-                            //message = splited[0];
+                            String message = data.getString("message");
+                            String[] splited = message.split(" ");
+                            message = splited[0];
 
                             FlightController flightController = ModuleVerificationUtil.getFlightController();
                             /*if (flightController == null) {
                                 return;
                             }*/
 
+                            mEdit.append("\n"+message);
                             //Toast.makeText(ChatBoxActivity.this, '_' + message + i + '_', Toast.LENGTH_SHORT).show();
-                            if (message.equals("takeOff") )
-                            {
+                            if (message.equals("takeOff")) {
                                 Toast.makeText(ChatBoxActivity.this, "takeOff", Toast.LENGTH_SHORT).show();
                                 if (flightController == null) {
                                     return;
                                 }
-                                        flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
-                                            @Override
-                                            public void onResult(DJIError djiError) {
-                                                DialogUtils.showDialogBasedOnError(ChatBoxActivity.this, djiError);
-                                            }
+                                flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
+                                    @Override
+                                    public void onResult(DJIError djiError) {
+                                        DialogUtils.showDialogBasedOnError(ChatBoxActivity.this, djiError);
+                                    }
 
-                                        });
+                                });
 
 
-                            }
-                            // à tester
-                            else if (message.equals("landing")) {
+                            } else if (message.equals("landing")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "landing", Toast.LENGTH_SHORT).show();
                                 if (flightController == null) {
@@ -166,8 +155,7 @@ public class ChatBoxActivity extends AppCompatActivity {
                                     }
                                 });
 
-                            }
-                            else if (message.equals("forceLand")){
+                            } else if (message.equals("forceLand")) {
                                 Toast.makeText(ChatBoxActivity.this, "forceLand", Toast.LENGTH_SHORT).show();
 
                                 if (flightController == null) {
@@ -179,157 +167,128 @@ public class ChatBoxActivity extends AppCompatActivity {
                                         DialogUtils.showDialogBasedOnError(ChatBoxActivity.this, djiError);
                                     }
                                 });
-                            }
-
-
-                            else if (message.equals("yawLeft")){
+                            } else if (message.equals("yawLeft")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "yawLeft", Toast.LENGTH_SHORT).show();
-                                leftStick(-5,0);
+                                leftStick(-5, 0);
                                 Thread.sleep(1000);
-                                leftStick(0,0);
-                            }
-                            else if (message.equals("yawRight")){
+                                leftStick(0, 0);
+                            } else if (message.equals("yawRight")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "yawRight", Toast.LENGTH_SHORT).show();
-                                leftStick(5,0);
+                                leftStick(5, 0);
                                 Thread.sleep(1000);
-                                leftStick(0,0);
+                                leftStick(0, 0);
                             }
 
                             //TEST CASQUE
 
-                            else if (message.equals("RotateLeft")){
+                            else if (message.equals("RotateLeft")) {
                                 // YAW LEFT
                                 Toast.makeText(ChatBoxActivity.this, "RotateLeft", Toast.LENGTH_SHORT).show();
-                                leftStick(-5,0);
+                                leftStick(-5, 0);
                                 Thread.sleep(1000);
-                                leftStick(0,0);
-                            }
-                            else if (message.equals("RotateRight")){
+                                leftStick(0, 0);
+                            } else if (message.equals("RotateRight")) {
                                 // YAW RIGHT
                                 Toast.makeText(ChatBoxActivity.this, "RotateRight", Toast.LENGTH_SHORT).show();
-                                leftStick(5,0);
+                                leftStick(5, 0);
                                 Thread.sleep(1000);
-                                leftStick(0,0);
+                                leftStick(0, 0);
                             }
 
                             //
 
-                            else if (message.equals("yawLeft1")){
+                            else if (message.equals("yawLeft1")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "yawLeft", Toast.LENGTH_SHORT).show();
-                                leftStick(-5,0);
+                                leftStick(-5, 0);
 
-                            }
-                            else if (message.equals("yawRight1")){
+                            } else if (message.equals("yawRight1")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "yawRight", Toast.LENGTH_SHORT).show();
-                                leftStick(5,0);
+                                leftStick(5, 0);
 
-                            }
-
-                            else if (message.equals("stopYaw")){
+                            } else if (message.equals("stopYaw")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "stopYaw", Toast.LENGTH_SHORT).show();
-                                leftStick(0,0);
+                                leftStick(0, 0);
 
-                            }
-
-                            else if (message.equals("up")){
+                            } else if (message.equals("up")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "up", Toast.LENGTH_SHORT).show();
-                                leftStick(0,3);
+                                leftStick(0, 3);
                                 Thread.sleep(100);
-                                leftStick(0,0);
-                            }
-                            else if (message.equals("down")){
+                                leftStick(0, 0);
+                            } else if (message.equals("down")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "down", Toast.LENGTH_SHORT).show();
-                                leftStick(0,-3);
+                                leftStick(0, -3);
                                 Thread.sleep(100);
-                                leftStick(0,0);
-                            }
-
-                            else if (message.equals("forward")){
+                                leftStick(0, 0);
+                            } else if (message.equals("forward")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "forward", Toast.LENGTH_SHORT).show();
-                                rightStick(0,5);
+                                rightStick(0, 5);
                                 Thread.sleep(200);
-                                rightStick(0,0);
-                            }
-                            else if (message.equals("forward1")){
+                                rightStick(0, 0);
+                            } else if (message.equals("forward1")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "forward", Toast.LENGTH_SHORT).show();
-                                rightStick(0,10);
+                                rightStick(0, 10);
                                 Thread.sleep(200);
-                                rightStick(0,0);
-                            }
-                            else if (message.equals("forward2")){
+                                rightStick(0, 0);
+                            } else if (message.equals("forward2")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "forward", Toast.LENGTH_SHORT).show();
-                                rightStick(0,5);
+                                rightStick(0, 5);
                                 Thread.sleep(500);
-                                rightStick(0,0);
-                            }
-                            else if (message.equals("backward")){
+                                rightStick(0, 0);
+                            } else if (message.equals("backward")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "backward", Toast.LENGTH_SHORT).show();
-                                rightStick(0,-5);
+                                rightStick(0, -5);
                                 Thread.sleep(200);
-                                rightStick(0,0);
-                            }
-                            else if (message.equals("backward1")){
+                                rightStick(0, 0);
+                            } else if (message.equals("backward1")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "backward", Toast.LENGTH_SHORT).show();
-                                rightStick(0,-10);
+                                rightStick(0, -10);
                                 Thread.sleep(200);
-                                rightStick(0,0);
-                            }
-                            else if (message.equals("backward2")){
+                                rightStick(0, 0);
+                            } else if (message.equals("backward2")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "backward", Toast.LENGTH_SHORT).show();
-                                rightStick(0,-10);
+                                rightStick(0, -10);
                                 Thread.sleep(500);
-                                rightStick(0,0);
-                            }
-                            else if (message.equals("right")){
+                                rightStick(0, 0);
+                            } else if (message.equals("right")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "right", Toast.LENGTH_SHORT).show();
-                                rightStick(3,0);
+                                rightStick(3, 0);
                                 Thread.sleep(100);
-                                rightStick(0,0);
-                            }
-                            else if (message.equals("left")){
+                                rightStick(0, 0);
+                            } else if (message.equals("left")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "left", Toast.LENGTH_SHORT).show();
-                                rightStick(-3,0);
+                                rightStick(-3, 0);
                                 Thread.sleep(100);
-                                rightStick(0,0);
-                            }
-                            else if (message.equals("stopAll")){
+                                rightStick(0, 0);
+                            } else if (message.equals("stopAll")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "stopAll", Toast.LENGTH_SHORT).show();
-                                rightStick(0,0);
-                                leftStick(0,0);
+                                rightStick(0, 0);
+                                leftStick(0, 0);
+                            } else {
+
+                                Toast.makeText(ChatBoxActivity.this, '_' + message + '_', Toast.LENGTH_SHORT).show();
+                                rightStick(0, 0);
+                                leftStick(0, 0);
                             }
 
-                            else {
-                                Toast.makeText(ChatBoxActivity.this, '_'+message+'_', Toast.LENGTH_SHORT).show();
-                                rightStick(0,0);
-                                leftStick(0,0);
-                            }
-/*
-                            if (message.equals("atterissage")) {
-
-                                Toast.makeText(ChatBoxActivity.this, "atterissage", Toast.LENGTH_SHORT).show();
-
-                            }
-*/
-                        } //catch (JSONException e) {
-                            //e.printStackTrace();
-                       // }
-                        catch (InterruptedException e) {
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
 
@@ -340,6 +299,7 @@ public class ChatBoxActivity extends AppCompatActivity {
 
 
     }
+
     protected void onPause() {
         super.onPause();
         Toast.makeText(ChatBoxActivity.this, "onPause", Toast.LENGTH_SHORT).show();
@@ -365,7 +325,7 @@ public class ChatBoxActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         Toast.makeText(ChatBoxActivity.this, "onStop", Toast.LENGTH_SHORT).show();
-       // reload();
+        // reload();
 
     }
 
