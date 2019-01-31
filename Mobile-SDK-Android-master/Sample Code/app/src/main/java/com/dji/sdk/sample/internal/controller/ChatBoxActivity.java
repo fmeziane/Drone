@@ -1,8 +1,16 @@
 package com.dji.sdk.sample.internal.controller;
 
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -40,6 +48,8 @@ public class ChatBoxActivity extends AppCompatActivity {
     private ToggleButton btnSimulator;
     private FlightControllerKey isSimulatorActived;
     private TextView textView;
+    private static final String TAG = "ChatBoxActivity";
+
     TextView mEdit;
     public void leftStick(float pX, float pY) {
         try {
@@ -85,13 +95,56 @@ public class ChatBoxActivity extends AppCompatActivity {
         }
     }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void alwaysPreferNetworksWith(@NonNull int[] capabilities, @NonNull int[] transportTypes) {
+
+        NetworkRequest.Builder request = new NetworkRequest.Builder();
+
+        // add capabilities
+        for (int cap: capabilities) {
+            request.addCapability(cap);
+        }
+
+        // add transport types
+        for (int trans: transportTypes) {
+            request.addTransportType(trans);
+        }
+
+        final ConnectivityManager connectivityManager = (ConnectivityManager) getApplicationContext().getSystemService(CONNECTIVITY_SERVICE);
+
+        connectivityManager.registerNetworkCallback(request.build(), new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(Network network) {
+                try {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                        ConnectivityManager.setProcessDefaultNetwork(network);
+                    } else {
+                        connectivityManager.bindProcessToNetwork(network);
+                    }
+                } catch (IllegalStateException e) {
+                    Log.e(TAG, "ConnectivityManager.NetworkCallback.onAvailable: ", e);
+                }
+            }
+        });
+    }
+
+
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_box);
         mEdit   = (TextView) findViewById(R.id.textView);
         mEdit.setMovementMethod(new ScrollingMovementMethod());
+
+        int[] capabilities = new int[]{ NetworkCapabilities.NET_CAPABILITY_INTERNET };
+        int[] transportTypes = new int[]{ NetworkCapabilities.TRANSPORT_CELLULAR };
+        alwaysPreferNetworksWith(capabilities, transportTypes);
+
         try {
+
             //socket = IO.socket("http://kamino-google-home.francecentral.cloudapp.azure.com:8002");
             socket = IO.socket("http://testserverbmi.westeurope.cloudapp.azure.com:3000");
             socket.connect();
@@ -122,12 +175,9 @@ public class ChatBoxActivity extends AppCompatActivity {
                             message = splited[0];
 
                             FlightController flightController = ModuleVerificationUtil.getFlightController();
-                            /*if (flightController == null) {
-                                return;
-                            }*/
+
 
                             mEdit.append("\n"+message);
-                            //Toast.makeText(ChatBoxActivity.this, '_' + message + i + '_', Toast.LENGTH_SHORT).show();
                             if (message.equals("takeOff")) {
                                 Toast.makeText(ChatBoxActivity.this, "takeOff", Toast.LENGTH_SHORT).show();
                                 if (flightController == null) {
@@ -226,19 +276,13 @@ public class ChatBoxActivity extends AppCompatActivity {
                                 leftStick(0, -3);
                                 Thread.sleep(100);
                                 leftStick(0, 0);
-                            } else if (message.equals("forward")) {
-
-                                Toast.makeText(ChatBoxActivity.this, "forward", Toast.LENGTH_SHORT).show();
-                                rightStick(0, 5);
-                                Thread.sleep(200);
-                                rightStick(0, 0);
                             } else if (message.equals("forward1")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "forward", Toast.LENGTH_SHORT).show();
                                 rightStick(0, 10);
                                 Thread.sleep(200);
                                 rightStick(0, 0);
-                            } else if (message.equals("forward2")) {
+                            } else if (message.equals("forward")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "forward", Toast.LENGTH_SHORT).show();
                                 rightStick(0, 5);
@@ -247,8 +291,8 @@ public class ChatBoxActivity extends AppCompatActivity {
                             } else if (message.equals("backward")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "backward", Toast.LENGTH_SHORT).show();
-                                rightStick(0, -5);
-                                Thread.sleep(200);
+                                rightStick(0, -10);
+                                Thread.sleep(500);
                                 rightStick(0, 0);
                             } else if (message.equals("backward1")) {
 
@@ -256,13 +300,7 @@ public class ChatBoxActivity extends AppCompatActivity {
                                 rightStick(0, -10);
                                 Thread.sleep(200);
                                 rightStick(0, 0);
-                            } else if (message.equals("backward2")) {
-
-                                Toast.makeText(ChatBoxActivity.this, "backward", Toast.LENGTH_SHORT).show();
-                                rightStick(0, -10);
-                                Thread.sleep(500);
-                                rightStick(0, 0);
-                            } else if (message.equals("right")) {
+                            }  else if (message.equals("right")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "right", Toast.LENGTH_SHORT).show();
                                 rightStick(3, 0);
@@ -295,8 +333,10 @@ public class ChatBoxActivity extends AppCompatActivity {
                     }
                 });
             }
+
         });
 
+       // cm.setNetworkPreference(ConnectivityManager.DEFAULT_NETWORK_PREFERENCE);
 
     }
 
@@ -345,6 +385,7 @@ public class ChatBoxActivity extends AppCompatActivity {
         super.onDestroy();
 
         socket.disconnect();
+
         Toast.makeText(ChatBoxActivity.this, "OnDestroy", Toast.LENGTH_SHORT).show();
         //reload();
     }
