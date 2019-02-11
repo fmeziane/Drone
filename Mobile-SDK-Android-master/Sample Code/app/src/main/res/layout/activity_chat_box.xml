@@ -8,10 +8,11 @@
     <LinearLayout
         android:layout_width="368dp"
         android:layout_height="match_parent"
+        android:background="@color/white"
         android:orientation="vertical"
         tools:layout_editor_absoluteX="8dp"
-        android:background="@color/white"
-        tools:layout_editor_absoluteY="8dp">
+        tools:layout_editor_absoluteY="8dp"
+        tools:ignore="MissingConstraints">
 
         <ImageView
             android:id="@+id/imageView4"
@@ -34,7 +35,86 @@
             android:textSize="50px"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="167dp" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/Take_off"
+                android:text="TakeOff"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+
+                android:gravity="center"/>
+
+            <Button
+                android:id="@+id/Landing"
+                android:text="Landing"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:gravity="center"/>
+
+
+        </LinearLayout>
+
     </LinearLayout>
+    <!--
+
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_alignParentRight="true"
+            android:scrollbars="vertical"
+            tools:ignore="MissingConstraints">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/camera_index_title"
+                    style="@style/test_text"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Camera List"/>
+
+                <TextView
+                    android:id="@+id/primary_video_feed_title"
+                    style="@style/test_text"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Primary Camera"/>
+
+                <FrameLayout
+                    android:layout_width="240dp"
+                    android:layout_height="140dp">
+
+                    <com.dji.sdk.sample.internal.utils.VideoFeedView
+                        android:id="@+id/primary_video_feed"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"/>
+
+                    <View
+                        android:id="@+id/primary_cover_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/black"
+                        android:visibility="visible"/>
+                </FrameLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+    -->
 
 
 </android.support.constraint.ConstraintLayout>

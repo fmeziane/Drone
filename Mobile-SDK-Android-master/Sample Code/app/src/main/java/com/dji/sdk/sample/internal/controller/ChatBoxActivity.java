@@ -1,7 +1,5 @@
 package com.dji.sdk.sample.internal.controller;
 
-
-import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -14,27 +12,21 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.widget.EditText;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
-
 import com.dji.sdk.sample.R;
 import com.dji.sdk.sample.internal.utils.DialogUtils;
 import com.dji.sdk.sample.internal.utils.ModuleVerificationUtil;
-import com.dji.sdk.sample.internal.utils.OnScreenJoystick;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.net.URISyntaxException;
-
 import dji.common.error.DJIError;
 import dji.common.util.CommonCallbacks;
-import dji.keysdk.FlightControllerKey;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.mobilerc.MobileRemoteController;
 import dji.sdk.products.Aircraft;
@@ -43,14 +35,12 @@ import dji.sdk.products.Aircraft;
 public class ChatBoxActivity extends AppCompatActivity {
 
     private Socket socket;
-    private OnScreenJoystick screenJoystickLeft;
     private MobileRemoteController mobileRemoteController;
-    private ToggleButton btnSimulator;
-    private FlightControllerKey isSimulatorActived;
-    private TextView textView;
     private static final String TAG = "ChatBoxActivity";
-
+    FlightController flightController = ModuleVerificationUtil.getFlightController();
     TextView mEdit;
+
+
     public void leftStick(float pX, float pY) {
         try {
             mobileRemoteController =
@@ -129,8 +119,6 @@ public class ChatBoxActivity extends AppCompatActivity {
         });
     }
 
-
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,7 +141,46 @@ public class ChatBoxActivity extends AppCompatActivity {
             e.printStackTrace();
 
         }
+        Button Take_Off = (Button) findViewById(R.id.Take_off);
+        Take_Off.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
 
+                if (flightController == null) {
+                    Toast.makeText(ChatBoxActivity.this, "Device not connected", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                /*
+                Toast.makeText(ChatBoxActivity.this, "takeOff", Toast.LENGTH_SHORT).show();
+
+                flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
+                    @Override
+                    public void onResult(DJIError djiError) {
+                        DialogUtils.showDialogBasedOnError(ChatBoxActivity.this, djiError);
+                    }
+
+                }); */
+                 }
+        });
+
+        Button Landing = (Button) findViewById(R.id.Landing);
+        Landing.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                if (flightController == null) {
+
+                    Toast.makeText(ChatBoxActivity.this, "Device not connected", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Toast.makeText(ChatBoxActivity.this, "landing", Toast.LENGTH_SHORT).show();
+
+                flightController.startLanding(new CommonCallbacks.CompletionCallback() {
+                    @Override
+                    public void onResult(DJIError djiError) {
+                        DialogUtils.showDialogBasedOnError(ChatBoxActivity.this, djiError);
+                    }
+                });            }
+        });
 
         socket.on("newmessage", new Emitter.Listener() {
 
@@ -174,7 +201,6 @@ public class ChatBoxActivity extends AppCompatActivity {
                             String[] splited = message.split(" ");
                             message = splited[0];
 
-                            FlightController flightController = ModuleVerificationUtil.getFlightController();
 
 
                             mEdit.append("\n"+message);
