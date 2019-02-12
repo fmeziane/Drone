@@ -14,6 +14,7 @@
         tools:layout_editor_absoluteY="8dp"
         tools:ignore="MissingConstraints">
 
+
         <ImageView
             android:id="@+id/imageView4"
             android:layout_width="match_parent"
@@ -22,7 +23,26 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/logobmi"
-            tools:layout_editor_absoluteY="0dp" />
+            tools:layout_editor_absoluteY="0dp"
+            android:visibility="visible"
+
+
+
+            />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="168dp"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            >
+
+            <com.dji.sdk.sample.internal.utils.VideoFeedView
+                android:id="@+id/primary_video_feed"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+        </FrameLayout>
 
         <TextView
             android:id="@+id/textView"
@@ -41,14 +61,17 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:gravity="center">
+            android:gravity="center"
+            android:weightSum="1"
+            >
+
 
             <Button
                 android:id="@+id/Take_off"
                 android:text="TakeOff"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
-                android:layout_weight="1"
+                android:layout_weight="0.5"
 
                 android:gravity="center"/>
 
@@ -57,13 +80,40 @@
                 android:text="Landing"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
-                android:layout_weight="1"
+                android:layout_weight="0.5"
                 android:gravity="center"/>
+
+        </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:weightSum="1"
+                >
+
+
+
+            <Button
+                android:id="@+id/Camera_view"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_weight="0.5"
+
+                android:gravity="center"
+                android:text="Camera View" />
 
 
         </LinearLayout>
 
+
+
+
     </LinearLayout>
+
+
     <!--
 
         <ScrollView

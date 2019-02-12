@@ -1,5 +1,7 @@
 package com.dji.sdk.sample.internal.controller;
 
+import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -12,13 +14,20 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.dji.sdk.sample.R;
+import com.dji.sdk.sample.internal.SeekBarValueChangeListener;
 import com.dji.sdk.sample.internal.utils.DialogUtils;
 import com.dji.sdk.sample.internal.utils.ModuleVerificationUtil;
+import com.dji.sdk.sample.internal.utils.ToastUtils;
+import com.dji.sdk.sample.internal.utils.VideoFeedView;
+import com.dji.sdk.sample.internal.view.PopupSeekBar;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
@@ -27,9 +36,15 @@ import org.json.JSONObject;
 import java.net.URISyntaxException;
 import dji.common.error.DJIError;
 import dji.common.util.CommonCallbacks;
+import dji.keysdk.CameraKey;
+import dji.keysdk.KeyManager;
+import dji.keysdk.callback.SetCallback;
+import dji.sdk.camera.VideoFeeder;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.mobilerc.MobileRemoteController;
 import dji.sdk.products.Aircraft;
+
+import static dji.midware.data.manager.P3.ServiceManager.getContext;
 
 
 public class ChatBoxActivity extends AppCompatActivity {
@@ -40,6 +55,68 @@ public class ChatBoxActivity extends AppCompatActivity {
     FlightController flightController = ModuleVerificationUtil.getFlightController();
     TextView mEdit;
 
+    private final int VISUAL_CAMERA_INDEX = 0;
+    private final int THERMAL_CAMERA_INDEX = 2;
+    private PopupSeekBar popupSeekBar;
+    private TextView primaryVideoFeedTitle;
+    private VideoFeedView primaryVideoFeed;
+    private VideoFeeder.PhysicalSourceListener sourceListener;
+
+    private void setCameraMSXLevel(int val1) {
+        KeyManager.getInstance().setValue(CameraKey.create(CameraKey.MSX_LEVEL, THERMAL_CAMERA_INDEX), val1, new SetCallback() {
+            @Override
+            public void onSuccess() {
+                ToastUtils.setResultToToast("Success");
+            }
+
+            @Override
+            public void onFailure(@NonNull DJIError error) {
+                ToastUtils.setResultToToast("Failed. " + error.toString());
+            }
+        });
+    }
+
+
+    private void initUI() {
+
+        primaryVideoFeedTitle = (TextView) findViewById(R.id.video_feed_title);
+        primaryVideoFeed = (VideoFeedView) findViewById(R.id.primary_video_feed);
+        popupSeekBar = new PopupSeekBar(getContext(), 0, 100, "MSX Level", new SeekBarValueChangeListener() {
+            @Override
+            public void onValueChange(int val1, int val2) {
+                setCameraMSXLevel(val1);
+                popupSeekBar.dismiss();
+            }
+        }, 300, 150, 0);
+
+    }
+
+    private void setUpListeners() {
+        sourceListener = new VideoFeeder.PhysicalSourceListener() {
+            @Override
+            public void onChange(VideoFeeder.VideoFeed videoFeed, VideoFeeder.PhysicalSource newPhysicalSource) {
+                if (videoFeed == VideoFeeder.getInstance().getPrimaryVideoFeed()) {
+                    String newText = "Primary Source: " + newPhysicalSource.toString();
+                    ToastUtils.setResultToText(primaryVideoFeedTitle, newText);
+                }
+
+
+            }
+        };
+        primaryVideoFeed.registerLiveVideo(VideoFeeder.getInstance().getPrimaryVideoFeed(), true);
+        String newText = "Primary Source: " + VideoFeeder.getInstance().getPrimaryVideoFeed().getVideoSource().name();
+        ToastUtils.setResultToText(primaryVideoFeedTitle, newText);
+
+        VideoFeeder.getInstance().addPhysicalSourceListener(sourceListener);
+    }
+
+    private void init(Context context) {
+
+        initUI();
+        setUpListeners();
+
+
+    }
 
     public void leftStick(float pX, float pY) {
         try {
@@ -129,8 +206,9 @@ public class ChatBoxActivity extends AppCompatActivity {
 
         int[] capabilities = new int[]{ NetworkCapabilities.NET_CAPABILITY_INTERNET };
         int[] transportTypes = new int[]{ NetworkCapabilities.TRANSPORT_CELLULAR };
-        alwaysPreferNetworksWith(capabilities, transportTypes);
 
+        alwaysPreferNetworksWith(capabilities, transportTypes);
+        init(getApplicationContext());
         try {
 
             //socket = IO.socket("http://kamino-google-home.francecentral.cloudapp.azure.com:8002");
@@ -161,6 +239,33 @@ public class ChatBoxActivity extends AppCompatActivity {
 
                 }); */
                  }
+        });
+
+
+        final Button Camera_View = (Button) findViewById(R.id.Camera_view);
+        final FrameLayout camera = (FrameLayout) findViewById(R.id.primary_video_feed);
+        final ImageView Image_View = (ImageView)  findViewById(R.id.imageView4);
+        Image_View.setVisibility(View.VISIBLE);
+        camera.setVisibility(View.GONE);
+        Camera_View.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+               // Image_View.setVisibility(View.GONE);
+               // Camera_View.setVisibility(View.VISIBLE);
+
+                if (camera.getVisibility()==View.GONE) {
+                  Image_View.setVisibility(View.GONE);
+                    camera.setVisibility(View.VISIBLE);
+                } else {
+                    Camera_View.setVisibility(View.GONE);
+                    Image_View.setVisibility(View.VISIBLE);
+
+
+                }
+
+
+
+            }
         });
 
         Button Landing = (Button) findViewById(R.id.Landing);
@@ -395,15 +500,6 @@ public class ChatBoxActivity extends AppCompatActivity {
 
     }
 
-    public void reload() {
-        Intent intent = getIntent();
-        overridePendingTransition(0, 0);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        finish();
-        overridePendingTransition(0, 0);
-        startActivity(intent);
-
-    }
 
 
     @Override
