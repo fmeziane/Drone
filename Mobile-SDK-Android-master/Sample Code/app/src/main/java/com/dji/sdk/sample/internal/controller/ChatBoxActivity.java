@@ -242,27 +242,33 @@ public class ChatBoxActivity extends AppCompatActivity {
         });
 
 
-        final Button Camera_View = (Button) findViewById(R.id.Camera_view);
-        final FrameLayout camera = (FrameLayout) findViewById(R.id.primary_video_feed);
+        Button Button_Camera_View = (Button) findViewById(R.id.Camera_view);
+
+        final com.dji.sdk.sample.internal.utils.VideoFeedView camera = (com.dji.sdk.sample.internal.utils.VideoFeedView) findViewById(R.id.primary_video_feed);
         final ImageView Image_View = (ImageView)  findViewById(R.id.imageView4);
         Image_View.setVisibility(View.VISIBLE);
         camera.setVisibility(View.GONE);
-        Camera_View.setOnClickListener(new View.OnClickListener() {
+        Button_Camera_View.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-               // Image_View.setVisibility(View.GONE);
-               // Camera_View.setVisibility(View.VISIBLE);
-
+              //  Image_View.setVisibility(View.GONE);
                 if (camera.getVisibility()==View.GONE) {
-                  Image_View.setVisibility(View.GONE);
+                    Image_View.setVisibility(View.GONE);
                     camera.setVisibility(View.VISIBLE);
-                } else {
+                }
+
+                else{
+                    camera.setVisibility(View.GONE);
+                    Image_View.setVisibility(View.VISIBLE); }
+
+                /*
+                else {
                     Camera_View.setVisibility(View.GONE);
                     Image_View.setVisibility(View.VISIBLE);
 
 
                 }
-
+*/
 
 
             }
