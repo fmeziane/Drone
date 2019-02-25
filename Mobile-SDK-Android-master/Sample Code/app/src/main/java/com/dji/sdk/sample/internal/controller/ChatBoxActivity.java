@@ -1,8 +1,7 @@
 package com.dji.sdk.sample.internal.controller;
-
-import android.app.Service;
+import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -14,11 +13,9 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.dji.sdk.sample.R;
@@ -76,6 +73,43 @@ public class ChatBoxActivity extends AppCompatActivity {
         });
     }
 
+    private void confirmTakingOff() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Confirm Taking Off");
+        builder.setMessage("You are about to takeoff the aircraft. Do you really want to proceed ?");
+        builder.setCancelable(false);
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (flightController == null) {
+                    Toast.makeText(ChatBoxActivity.this, "Device not connected", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Toast.makeText(ChatBoxActivity.this, "takeOff", Toast.LENGTH_SHORT).show();
+                //
+                // Fonction très sensible du code
+                //
+                flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
+                    @Override
+                    public void onResult(DJIError djiError) {
+                        DialogUtils.showDialogBasedOnError(ChatBoxActivity.this, djiError);
+                    }
+
+                });
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(), "canceled landing", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.show();
+    }
+
 
     private void initUI() {
 
@@ -99,23 +133,17 @@ public class ChatBoxActivity extends AppCompatActivity {
                     String newText = "Primary Source: " + newPhysicalSource.toString();
                     ToastUtils.setResultToText(primaryVideoFeedTitle, newText);
                 }
-
-
             }
         };
         primaryVideoFeed.registerLiveVideo(VideoFeeder.getInstance().getPrimaryVideoFeed(), true);
         String newText = "Primary Source: " + VideoFeeder.getInstance().getPrimaryVideoFeed().getVideoSource().name();
         ToastUtils.setResultToText(primaryVideoFeedTitle, newText);
-
         VideoFeeder.getInstance().addPhysicalSourceListener(sourceListener);
     }
 
     private void init(Context context) {
-
         initUI();
         setUpListeners();
-
-
     }
 
     public void leftStick(float pX, float pY) {
@@ -140,7 +168,6 @@ public class ChatBoxActivity extends AppCompatActivity {
         }
     }
 
-
     public void rightStick(float pX, float pY) {
         try {
             mobileRemoteController =
@@ -161,7 +188,6 @@ public class ChatBoxActivity extends AppCompatActivity {
             mobileRemoteController.setRightStickVertical(pY);
         }
     }
-
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void alwaysPreferNetworksWith(@NonNull int[] capabilities, @NonNull int[] transportTypes) {
@@ -222,55 +248,28 @@ public class ChatBoxActivity extends AppCompatActivity {
         Button Take_Off = (Button) findViewById(R.id.Take_off);
         Take_Off.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
-                if (flightController == null) {
-                    Toast.makeText(ChatBoxActivity.this, "Device not connected", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                /*
-                Toast.makeText(ChatBoxActivity.this, "takeOff", Toast.LENGTH_SHORT).show();
-
-                flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
-                    @Override
-                    public void onResult(DJIError djiError) {
-                        DialogUtils.showDialogBasedOnError(ChatBoxActivity.this, djiError);
-                    }
-
-                }); */
-                 }
+                confirmTakingOff();
+            }
         });
-
 
         Button Button_Camera_View = (Button) findViewById(R.id.Camera_view);
 
         final com.dji.sdk.sample.internal.utils.VideoFeedView camera = (com.dji.sdk.sample.internal.utils.VideoFeedView) findViewById(R.id.primary_video_feed);
         final ImageView Image_View = (ImageView)  findViewById(R.id.imageView4);
+
         Image_View.setVisibility(View.VISIBLE);
         camera.setVisibility(View.GONE);
         Button_Camera_View.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-              //  Image_View.setVisibility(View.GONE);
                 if (camera.getVisibility()==View.GONE) {
                     Image_View.setVisibility(View.GONE);
                     camera.setVisibility(View.VISIBLE);
                 }
 
-                else{
+                else if (camera.getVisibility()==View.VISIBLE ) {
                     camera.setVisibility(View.GONE);
                     Image_View.setVisibility(View.VISIBLE); }
-
-                /*
-                else {
-                    Camera_View.setVisibility(View.GONE);
-                    Image_View.setVisibility(View.VISIBLE);
-
-
-                }
-*/
-
-
             }
         });
 
@@ -305,14 +304,9 @@ public class ChatBoxActivity extends AppCompatActivity {
                         JSONObject data = (JSONObject) args[0];
                         try {
                             //extract data from fired event
-                            int i = 0;
-
-
                             String message = data.getString("message");
                             String[] splited = message.split(" ");
                             message = splited[0];
-
-
 
                             mEdit.append("\n"+message);
                             if (message.equals("takeOff")) {
@@ -325,9 +319,7 @@ public class ChatBoxActivity extends AppCompatActivity {
                                     public void onResult(DJIError djiError) {
                                         DialogUtils.showDialogBasedOnError(ChatBoxActivity.this, djiError);
                                     }
-
                                 });
-
 
                             } else if (message.equals("landing")) {
 
@@ -369,7 +361,6 @@ public class ChatBoxActivity extends AppCompatActivity {
                             }
 
                             //TEST CASQUE
-
                             else if (message.equals("RotateLeft")) {
                                 // YAW LEFT
                                 Toast.makeText(ChatBoxActivity.this, "RotateLeft", Toast.LENGTH_SHORT).show();
@@ -383,8 +374,6 @@ public class ChatBoxActivity extends AppCompatActivity {
                                 Thread.sleep(1000);
                                 leftStick(0, 0);
                             }
-
-                            //
 
                             else if (message.equals("yawLeft1")) {
 
@@ -472,41 +461,31 @@ public class ChatBoxActivity extends AppCompatActivity {
             }
 
         });
-
-       // cm.setNetworkPreference(ConnectivityManager.DEFAULT_NETWORK_PREFERENCE);
-
     }
 
     protected void onPause() {
         super.onPause();
         Toast.makeText(ChatBoxActivity.this, "onPause", Toast.LENGTH_SHORT).show();
-        //reload();
 
     }
 
     protected void onResume() {
         super.onResume();
         Toast.makeText(ChatBoxActivity.this, "onResume", Toast.LENGTH_SHORT).show();
-        //reload();
 
     }
 
     protected void onRestart() {
         super.onRestart();
         Toast.makeText(ChatBoxActivity.this, "onRestart", Toast.LENGTH_SHORT).show();
-        //reload();
-
     }
 
 
     protected void onStop() {
         super.onStop();
         Toast.makeText(ChatBoxActivity.this, "onStop", Toast.LENGTH_SHORT).show();
-        // reload();
 
     }
-
-
 
     @Override
     protected void onDestroy() {
@@ -515,7 +494,6 @@ public class ChatBoxActivity extends AppCompatActivity {
         socket.disconnect();
 
         Toast.makeText(ChatBoxActivity.this, "OnDestroy", Toast.LENGTH_SHORT).show();
-        //reload();
     }
 
 }
