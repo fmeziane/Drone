@@ -417,7 +417,7 @@ public class ChatBoxActivity extends AppCompatActivity {
                             } else if (message.equals("backward")) {
 
                                 Toast.makeText(ChatBoxActivity.this, "backward", Toast.LENGTH_SHORT).show();
-                                rightStick(0, -10);
+                                rightStick(0, -5);
                                 Thread.sleep(500);
                                 rightStick(0, 0);
                             } else if (message.equals("backward1")) {
